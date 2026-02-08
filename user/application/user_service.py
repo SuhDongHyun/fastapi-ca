@@ -15,7 +15,9 @@ class UserService:
         self.ulid = ULID()
         self.crypto = Crpyto()
 
-    async def create_user(self, name: str, email: str, password: str):
+    async def create_user(
+        self, name: str, email: str, password: str, memo: str | None = None
+    ):
         _user = None
 
         try:
@@ -33,6 +35,7 @@ class UserService:
             id=self.ulid.generate(),
             profile=profile,
             password=self.crypto.encrypt(password),
+            memo=memo,
             created_at=now,
             updated_at=now,
         )
