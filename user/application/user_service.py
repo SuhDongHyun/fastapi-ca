@@ -1,7 +1,6 @@
 from ulid import ULID
 from datetime import datetime
 from fastapi import HTTPException
-from dependency_injector.wiring import inject
 
 from user.domain.user import User, Profile
 from user.domain.repository.user_repo import IUserRepository
@@ -9,7 +8,6 @@ from utils.crypto import Crpyto
 
 
 class UserService:
-    @inject
     def __init__(self, user_repo: IUserRepository):
         self.user_repo: IUserRepository = user_repo
         self.ulid = ULID()
@@ -40,4 +38,17 @@ class UserService:
             updated_at=now,
         )
         await self.user_repo.save(user)
+        return user
+
+    async def update_user(
+        self, user_id: str, name: str | None = None, password: str | None = None
+    ):
+        user = await self.user_repo.find_by_id(user_id)
+
+        if name:
+            user.profile.name = name
+        if password:
+            user.password = self.crypto.encrypt(password)
+        user.updated_at = datetime.now()
+        await self.user_repo.update(user)
         return user

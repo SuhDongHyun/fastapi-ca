@@ -9,7 +9,6 @@ from user.interface.controllers.user_controller import router as user_routers
 
 
 app = FastAPI()
-app.state.container = Container()
 app.include_router(user_routers)
 
 
@@ -21,5 +20,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
+container = Container()
+container.wire
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", reload=True)
+    uvicorn.run("main:app", host="localhost", port=9999, reload=True)

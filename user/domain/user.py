@@ -2,13 +2,13 @@ from dataclasses import dataclass
 from datetime import datetime
 
 
-@dataclass(frozen=True)
+@dataclass
 class Profile:
     name: str
     email: str
 
 
-@dataclass(frozen=True)
+@dataclass
 class User:
     id: str
     profile: Profile
