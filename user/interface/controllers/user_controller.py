@@ -1,5 +1,6 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from dependency_injector.wiring import inject, Provide
 from containers import Container
 
@@ -9,17 +10,31 @@ router = APIRouter(prefix="/users")
 
 
 class CreateUserBody(BaseModel):
-    name: str
-    email: str
-    password: str
+    name: str = Field(min_length=2, max_length=32)
+    email: EmailStr = Field(max_length=64)
+    password: str = Field(min_length=8, max_length=32)
 
 
 class UpdateUser(BaseModel):
-    name: str | None = None
-    password: str | None = None
+    name: str | None = Field(min_length=2, max_length=32, default=None)
+    password: str | None = Field(min_length=8, max_length=32, default=None)
 
 
-@router.post("", status_code=201)
+class UserResponse(BaseModel):
+    id: str
+    name: str
+    email: EmailStr
+    created_at: datetime
+    updated_at: datetime
+
+
+class GetUsersResponse(BaseModel):
+    total_count: int
+    page: int
+    users: list[UserResponse]
+
+
+@router.post("", status_code=201, response_model=UserResponse)
 @inject
 async def create_user(
     user: CreateUserBody,
@@ -46,3 +61,28 @@ async def update_user(
     )
 
     return updated_user
+
+
+@router.get("", response_model=GetUsersResponse)
+@inject
+async def get_users(
+    page: int = 1,
+    items_per_page: int = 10,
+    user_service: UserService = Depends(Provide[Container.user_service]),
+):
+    total_count, users = await user_service.get_users(page, items_per_page)
+
+    return {
+        "total_count": total_count,
+        "page": page,
+        "users": users,
+    }
+
+
+@router.delete("/", status_code=204)
+@inject
+async def delete_user(
+    user_id: str,
+    user_service: UserService = Depends(Provide[Container.user_service]),
+):
+    await user_service.delete_user(user_id)

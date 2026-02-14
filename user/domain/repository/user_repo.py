@@ -22,3 +22,11 @@ class IUserRepository(metaclass=ABCMeta):
     @abstractmethod
     async def update(self, user: User):
         raise NotImplementedError
+
+    @abstractmethod
+    async def get_users(self, page: int, items_per_page: int) -> tuple[int, list[User]]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete(self, id: str):
+        raise NotImplementedError

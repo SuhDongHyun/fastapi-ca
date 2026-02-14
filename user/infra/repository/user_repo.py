@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from fastapi import HTTPException
 
 from database import get_session
@@ -96,6 +96,56 @@ class UserRepository(IUserRepository):
             await session.commit()
 
             return user
+        except:
+            await session.rollback()
+            raise
+        finally:
+            await agen.aclose()
+
+    async def get_users(
+        self, page: int = 1, items_per_page: int = 10
+    ) -> tuple[int, list[UserVO]]:
+        agen = get_session()
+        session = await agen.__anext__()
+
+        try:
+            stmt = select(func.count()).select_from(User)
+            res = await session.execute(stmt)
+            total_count = res.scalar_one()
+
+            offset = (page - 1) * items_per_page
+            stmt = select(User).offset(offset).limit(items_per_page)
+            res = await session.execute(stmt)
+            users = res.scalars().all()
+
+            return total_count, [
+                UserVO(
+                    id=user.id,
+                    profile=Profile(name=user.name, email=user.email),
+                    password=user.password,
+                    memo=user.memo,
+                    created_at=user.created_at,
+                    updated_at=user.updated_at,
+                )
+                for user in users
+            ]
+        finally:
+            await agen.aclose()
+
+    async def delete(self, id: str):
+        agen = get_session()
+        session = await agen.__anext__()
+
+        try:
+            stmt = select(User).where(User.id == id).limit(1)
+            res = await session.execute(stmt)
+            user = res.scalars().first()
+
+            if user is None:
+                raise HTTPException(status_code=422)
+
+            await session.delete(user)
+            await session.commit()
         except:
             await session.rollback()
             raise
