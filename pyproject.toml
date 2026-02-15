@@ -15,6 +15,8 @@ dependencies = [
     "psycopg2-binary>=2.9.11",
     "py-ulid>=1.0.3",
     "pydantic[email]>=2.12.5",
+    "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.22",
     "sqlalchemy>=2.0.45",
     "uvicorn[standard]>=0.40.0",
 ]

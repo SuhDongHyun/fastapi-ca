@@ -1,10 +1,11 @@
 from ulid import ULID
 from datetime import datetime
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
 from user.domain.user import User, Profile
 from user.domain.repository.user_repo import IUserRepository
 from utils.crypto import Crpyto
+from utils.auth import create_access_token, Role
 
 
 class UserService:
@@ -58,3 +59,11 @@ class UserService:
 
     async def delete_user(self, user_id: str):
         await self.user_repo.delete(user_id)
+
+    async def login(self, email: str, password: str) -> str:
+        user = await self.user_repo.find_by_email(email)
+
+        if not self.crypto.verify(password, user.password):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+        return create_access_token(payload={"user_id": user.id}, role=Role.USER)
