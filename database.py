@@ -1,11 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 
+from config import settings
+
 DB_HOST = "192.168.49.2"
 DB_PORT = "30432"
 DB_NAME = "fastapi_ca"
-DB_USER = "admin"
-DB_PASS = "admin"
+DB_USER = settings.db.username
+DB_PASS = settings.db.password
 
 
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

@@ -1,12 +1,16 @@
+from enum import StrEnum
 from typing import Annotated
 from dataclasses import dataclass
-from enum import StrEnum
-from datetime import datetime, timedelta, timezone
+
 from jose import JWTError, jwt
+from datetime import datetime, timedelta, timezone
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-SECRET_KEY = "THIS_IS_SUPER_SECRET_KEY"
+from config import settings
+
+SECRET_KEY = settings.jwt.secret
 ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")

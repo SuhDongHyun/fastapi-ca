@@ -11,3 +11,6 @@ wheels/
 
 # Notebook files
 notebook/
+
+# Config
+.env
