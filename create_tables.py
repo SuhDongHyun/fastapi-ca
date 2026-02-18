@@ -1,7 +1,7 @@
 import asyncio
 
 from database import engine, Base
-from user.infra.model.user import User
+from user.infra.model.user import User  # noqa: F401
 
 
 async def create_tables() -> None:

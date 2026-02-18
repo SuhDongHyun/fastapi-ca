@@ -10,7 +10,7 @@ from containers import Container
 from user.application.user_service import UserService
 from utils.auth import get_current_user, CurrentUser, get_admin_user
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["users"])
 
 
 class CreateUserBody(BaseModel):
