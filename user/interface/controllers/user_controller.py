@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated
 from pydantic import BaseModel, EmailStr, Field
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from dependency_injector.wiring import inject, Provide
 
@@ -55,10 +55,11 @@ async def login(
 @inject
 async def create_user(
     user: CreateUserBody,
+    background_tasks: BackgroundTasks,
     user_service: UserService = Depends(Provide[Container.user_service]),
 ):
     created_user = await user_service.create_user(
-        name=user.name, email=user.email, password=user.password
+        background_tasks, name=user.name, email=user.email, password=user.password
     )
 
     return UserResponse(

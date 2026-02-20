@@ -1,21 +1,28 @@
 from ulid import ULID
 from datetime import datetime
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, BackgroundTasks
 
 from user.domain.user import User, Profile
 from user.domain.repository.user_repo import IUserRepository
+from user.application.email_service import EmailService
 from utils.crypto import Crpyto
 from utils.auth import create_access_token, Role
 
 
 class UserService:
-    def __init__(self, user_repo: IUserRepository):
+    def __init__(self, user_repo: IUserRepository, email_service: EmailService):
         self.user_repo: IUserRepository = user_repo
+        self.email_service: EmailService = email_service
         self.ulid = ULID()
         self.crypto = Crpyto()
 
     async def create_user(
-        self, name: str, email: str, password: str, memo: str | None = None
+        self,
+        background_tasks: BackgroundTasks,
+        name: str,
+        email: str,
+        password: str,
+        memo: str | None = None,
     ):
         _user = None
 
@@ -39,6 +46,10 @@ class UserService:
             updated_at=now,
         )
         await self.user_repo.save(user)
+
+        background_tasks.add_task(
+            self.email_service.send_email, receiver_email=user.profile.email
+        )
         return user
 
     async def update_user(

@@ -15,9 +15,14 @@ class JWTSettings(BaseModel):
     secret: str
 
 
+class EmailSettings(BaseModel):
+    password: str
+
+
 class AppSettings(BaseSettings):
     db: DBSettings
     jwt: JWTSettings
+    email: EmailSettings
 
     model_config = SettingsConfigDict(
         env_file=".env",
